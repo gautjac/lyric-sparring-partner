@@ -1,0 +1,12 @@
+# Static site — no build step. Netlify just serves the folder as-is.
+[build]
+  publish = "."
+  command = ""
+
+# Tiny niceties:
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options       = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"

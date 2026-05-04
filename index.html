@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Lyric Sparring Partner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="light">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">¶</span>
+      <span class="brand-name">Lyric Sparring Partner</span>
+      <span class="brand-sub">a writing room, not a chatbot</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="exampleBtn"  class="ghost" title="Insert a sample seed line">Try a seed</button>
+      <button id="themeToggle" class="ghost" aria-label="Toggle theme" title="Toggle dark mode">◐</button>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ============ SEED ============ -->
+    <section class="panel seed-panel" aria-label="Seed input">
+      <div class="panel-head">
+        <h2 class="panel-title">The seed</h2>
+        <span class="panel-hint">A line, a couplet, a fragment. Whatever is alive.</span>
+      </div>
+      <textarea
+        id="seed"
+        class="seed-input"
+        rows="4"
+        spellcheck="true"
+        placeholder="I kept your name in the mouth of winter…"></textarea>
+
+      <div class="controls">
+        <div class="slider-group">
+          <label>
+            <span class="slider-label"><span>Tone</span><em id="toneLabel">balanced</em></span>
+            <input type="range" id="tone" min="0" max="100" value="50" />
+            <span class="slider-ends"><span>subtle</span><span>bold</span></span>
+          </label>
+          <label>
+            <span class="slider-label"><span>Imagery</span><em id="absLabel">balanced</em></span>
+            <input type="range" id="abstraction" min="0" max="100" value="50" />
+            <span class="slider-ends"><span>concrete</span><span>dreamlike</span></span>
+          </label>
+          <label>
+            <span class="slider-label"><span>Diction</span><em id="cxLabel">balanced</em></span>
+            <input type="range" id="complexity" min="0" max="100" value="50" />
+            <span class="slider-ends"><span>plainspoken</span><span>literary</span></span>
+          </label>
+        </div>
+
+        <div class="toggle-group" id="toggleGroup" role="group" aria-label="Craft constraints">
+          <button class="chip" data-toggle="singable">keep it singable</button>
+          <button class="chip" data-toggle="no-cliche">avoid clichés</button>
+          <button class="chip" data-toggle="imagery">stronger imagery</button>
+          <button class="chip" data-toggle="conversational">conversational</button>
+          <button class="chip" data-toggle="rhythm">tighter rhythm</button>
+          <button class="chip" data-toggle="darker">darker</button>
+          <button class="chip" data-toggle="hopeful">more hopeful</button>
+        </div>
+
+        <div class="action-row">
+          <button id="generateBtn" class="primary">Spar with me ⏎</button>
+          <span class="hotkey-hint">⌘/Ctrl ⏎</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ OUTPUT ============ -->
+    <section class="panel output-panel" aria-label="Sparring continuations">
+      <div class="panel-head">
+        <h2 class="panel-title">Sparring partners</h2>
+        <span class="panel-hint">Five pressure angles. Take what's useful. Tap a line to keep it.</span>
+      </div>
+      <div id="cards" class="cards" aria-live="polite">
+        <div class="empty-state">
+          <p>The room is quiet.</p>
+          <p class="muted">Drop a line above and we'll start trading verses.</p>
+        </div>
+      </div>
+
+      <div id="compareBar" class="compare-bar hidden" role="region" aria-label="Compare lines">
+        <span class="compare-status"><span id="compareCount">0</span> / 2 selected for compare</span>
+        <button id="compareBtn" class="ghost" disabled>Compare these two</button>
+        <button id="clearCompareBtn" class="ghost subtle">clear</button>
+      </div>
+
+      <div id="compareResult" class="compare-result hidden" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ KEEPERS ============ -->
+    <aside class="panel keepers-panel" aria-label="Saved lines">
+      <div class="panel-head">
+        <h2 class="panel-title">Keepers</h2>
+        <span class="panel-hint">Saved here, saved on this device.</span>
+      </div>
+      <div id="keepers" class="keepers"></div>
+      <div class="export-row">
+        <button id="copyPlain"   class="ghost" title="Copy keepers as plain text">copy plain</button>
+        <button id="copyVerse"   class="ghost" title="Copy as verse block (with line breaks)">copy verse</button>
+        <button id="exportMd"    class="ghost" title="Download a rough lyric draft as markdown">export draft .md</button>
+        <button id="clearKeepers" class="ghost subtle" title="Clear all keepers">clear</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Compare picker modal -->
+  <div id="comparePicker" class="modal hidden" role="dialog" aria-modal="true" aria-label="Pick two lines to compare">
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-body">
+      <h3>Pick two lines to put next to each other</h3>
+      <p class="muted">Click a line in any card to flag it for compare. Selected lines appear here.</p>
+      <div id="comparePool" class="compare-pool"></div>
+      <div class="modal-actions">
+        <button class="ghost" data-close>close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast region -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer">
+    <span>Built for the writing desk. Mock generator on by default — wire <code>generator.js</code> to Claude when you're ready.</span>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
