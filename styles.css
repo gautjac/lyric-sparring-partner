@@ -383,6 +383,14 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   background: transparent;
 }
 
+.lang-toggle {
+  font-family: var(--serif);
+  font-style: italic;
+  letter-spacing: 0.02em;
+  min-width: 70px;
+  text-align: center;
+}
+
 .action-row {
   display: flex;
   align-items: center;
@@ -666,8 +674,7 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   padding-right: 4px;
 }
 
-.keepers:empty::before {
-  content: "Lines you save here become a draft.";
+.keepers-empty {
   font-family: var(--serif);
   font-style: italic;
   color: var(--ink-faint);

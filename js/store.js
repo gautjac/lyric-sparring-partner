@@ -30,4 +30,7 @@ export const store = {
 
   getSeed()           { return read("seed", ""); },
   setSeed(s)          { write("seed", s); },
+
+  getLang()           { return read("lang", null); },
+  setLang(l)          { write("lang", l); },
 };

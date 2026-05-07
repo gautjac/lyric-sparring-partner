@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lyric-sparring-partner",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5588", "--directory", "/Users/jacquesgautreau/Library/Mobile Documents/com~apple~CloudDocs/Claude/lyric-sparring-partner"],
+      "port": 5588
+    }
+  ]
+}
