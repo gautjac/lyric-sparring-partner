@@ -44,7 +44,7 @@ import {
 // ---------------------------------------------------------------
 export const USE_CLAUDE = true;
 export const CLAUDE_PROXY_URL = "/api/claude";
-export const CLAUDE_MODEL = "claude-opus-4-7";
+export const CLAUDE_MODEL = "claude-sonnet-4-6";
 
 // ---------------------------------------------------------------
 // Public API
