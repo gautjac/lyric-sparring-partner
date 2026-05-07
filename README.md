@@ -60,34 +60,51 @@ will obviously be much better.
 
 ---
 
-## Wire it to Claude
+## Live Claude integration
 
-Out of the box the app uses a templated mock so you can play with the
-interface immediately. To switch to real Claude generations:
+`USE_CLAUDE` is **on** by default. Production uses a Netlify Function that
+proxies to the Anthropic Messages API.
 
-1. **Stand up a tiny proxy.** The browser can't call `api.anthropic.com`
-   directly (CORS + your key would leak). The proxy contract is:
+```
+js/generator.js (browser)
+        │
+        │  POST /api/claude  { system, user, model }
+        ▼
+netlify/functions/claude.js  ← reads ANTHROPIC_API_KEY from env
+        │
+        │  POST https://api.anthropic.com/v1/messages
+        ▼
+       Claude
+```
 
-   ```
-   POST /api/claude
-   Body: { "system": "...", "user": "...", "model": "claude-opus-4-7" }
-   200:  { "content": "<the model's text>" }
-   ```
+The key is **never** in the repo. It's set as an encrypted env var on the
+Netlify site:
 
-   Any Node / Bun / Deno / Cloudflare Worker / Vercel function will do.
-   Forward `system` and `user` to the Messages API with your key in the
-   `x-api-key` header.
+```bash
+netlify env:set ANTHROPIC_API_KEY "sk-ant-..." --context production --secret
+```
 
-2. **Flip the switch** in `js/generator.js`:
+To run with the real proxy locally, use Netlify's local dev server:
 
-   ```js
-   export const USE_CLAUDE = true;
-   export const CLAUDE_PROXY_URL = "/api/claude";
-   ```
+```bash
+netlify dev    # serves the static site AND the function on one port
+```
 
-3. The model is asked to return strict JSON. `safeParseJSON()` is forgiving
-   (strips fences, finds the first `{...}`) and falls back to the mock if
-   parsing fails, so a malformed response never breaks the UI.
+A plain `python3 -m http.server` won't run the function, so the frontend
+will hit `/api/claude` and 404 — the generator catches that and falls back
+to the mock so the UI stays usable. To explicitly test the mock offline,
+flip `USE_CLAUDE = false` in `js/generator.js`.
+
+### Hardening notes
+
+The proxy does the bare minimum security needed for a personal site:
+
+- Origin allowlist (only the deployed site + listed dev hosts).
+- Hard caps on `user` length and `max_tokens`.
+- The key lives only in the Netlify env, marked `--secret`.
+
+For anything beyond a personal demo, add auth (a session cookie or signed
+client token) and rate-limit per IP.
 
 ---
 

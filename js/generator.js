@@ -34,10 +34,16 @@ import {
 } from "./rewrite.js";
 
 // ---------------------------------------------------------------
-// Configuration. Flip USE_CLAUDE to true once you have a proxy up.
+// Configuration.
+//   USE_CLAUDE=true  → real Claude generations via /api/claude
+//                      (Netlify Function, key in env var).
+//   USE_CLAUDE=false → templated mock; useful for offline / dev.
+// CLAUDE_PROXY_URL is same-origin in production. To run the
+// frontend against a different proxy (e.g. local netlify dev),
+// override this constant or wrap it in an env-aware check.
 // ---------------------------------------------------------------
-export const USE_CLAUDE = false;
-export const CLAUDE_PROXY_URL = "/api/claude"; // your endpoint
+export const USE_CLAUDE = true;
+export const CLAUDE_PROXY_URL = "/api/claude";
 export const CLAUDE_MODEL = "claude-opus-4-7";
 
 // ---------------------------------------------------------------
@@ -586,16 +592,22 @@ async function claudeGenerate(req) {
     throw new Error(`Unknown request kind: ${req.kind}`);
   }
 
-  const res = await fetch(CLAUDE_PROXY_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ system, user, model: CLAUDE_MODEL }),
-  });
-
-  if (!res.ok) throw new Error(`Claude proxy ${res.status}`);
-  const { content } = await res.json();
-
-  return safeParseJSON(content, req);
+  try {
+    const res = await fetch(CLAUDE_PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ system, user, model: CLAUDE_MODEL }),
+    });
+    if (!res.ok) {
+      console.warn(`Claude proxy ${res.status} — falling back to mock`);
+      return fallback(req);
+    }
+    const { content } = await res.json();
+    return safeParseJSON(content, req);
+  } catch (e) {
+    console.warn("Claude proxy unreachable — falling back to mock", e);
+    return fallback(req);
+  }
 }
 
 // Lenient JSON parser — strips fences, finds first { ... }, falls back gracefully.
